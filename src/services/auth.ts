@@ -1,7 +1,14 @@
 import { EmailOtpType, Provider, User, Session, SupabaseClient } from '@supabase/supabase-js';
 
 export default class AuthService {
-    constructor(private supabase: SupabaseClient) { }
+    private baseUrl: string;
+
+    constructor(private supabase: SupabaseClient) {
+        // Use the environment variable if available, otherwise fallback to the current origin
+        this.baseUrl = typeof window !== 'undefined' 
+            ? process.env.NEXT_PUBLIC_PROJECT_URL || window.location.origin
+            : process.env.NEXT_PUBLIC_PROJECT_URL || 'http://localhost:3000';
+    }
 
     async getUserId(): Promise<string | null> {
         const user = await this.getUser();
@@ -39,9 +46,12 @@ export default class AuthService {
     }
 
     async signInWithProvider(provider: Provider): Promise<void> {
+        const redirectUrl = new URL('/confirm-signup', this.baseUrl);
+        redirectUrl.searchParams.set('oauth', provider);
+
         const { error } = await this.supabase.auth.signInWithOAuth({
             provider,
-            options: { redirectTo: `${process.env.NEXT_PUBLIC_PROJECT_URL}/confirm-signup?oauth=${provider}` }
+            options: { redirectTo: redirectUrl.toString() }
         });
         this.handleError(error);
     }
@@ -58,8 +68,10 @@ export default class AuthService {
     }
 
     async forgotPassword(email: string): Promise<boolean> {
+        const redirectUrl = new URL('/new-password', this.baseUrl);
+        
         const { error } = await this.supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: `${process.env.NEXT_PUBLIC_PROJECT_URL}/new-password`
+            redirectTo: redirectUrl.toString()
         });
         this.handleError(error);
         return true;

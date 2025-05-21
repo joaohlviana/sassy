@@ -12,7 +12,7 @@ import {
 export async function GET(request: NextRequest) {
   try {
     const cookieStore = cookies();
-    const localeCookie = cookieStore.get("locale");
+    const localeCookie = await cookieStore.get("locale");
     const locale = localeCookie?.value || "en-US";
 
     const { translate } = await loadTranslationsSSR(locale);

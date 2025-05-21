@@ -3,11 +3,14 @@ import Stripe from 'stripe';
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
 if (!stripeSecretKey) {
-  console.error('Missing STRIPE_SECRET_KEY environment variable');
-  throw new Error('Stripe configuration error');
+  throw new Error('Missing STRIPE_SECRET_KEY environment variable');
 }
 
-export const stripe = new Stripe(stripeSecretKey, {
+if (!stripeSecretKey.startsWith('sk_')) {
+  throw new Error('Invalid STRIPE_SECRET_KEY format. Must start with "sk_"');
+}
+
+export const stripe = new Stripe(stripeSecretKey.trim(), {
     apiVersion: '2025-03-31.basil',
     typescript: true,
     maxNetworkRetries: 3,

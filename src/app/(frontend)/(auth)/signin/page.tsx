@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 import { useReducer } from "react";
 
@@ -51,7 +51,6 @@ function reducer(state: SignInStateType, action: SignInAction) {
 export default function SignIn() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { translate } = useI18n("pages.signin");
 
   async function handleSignIn() {

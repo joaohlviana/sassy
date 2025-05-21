@@ -37,7 +37,7 @@ export default function Navbar() {
   return (
     <header className="bg-white shadow">
       <div className="container mx-auto relative flex items-center justify-between py-4 px-6">
-        <a href="./" className="flex items-center space-x-4 cursor-pointer">
+        <a href="/" className="flex items-center space-x-4 cursor-pointer">
           <Image
             src="/logo.ico"
             alt="Micro-SaaS Illustration"

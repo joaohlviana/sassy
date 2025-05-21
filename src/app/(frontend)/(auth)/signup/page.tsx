@@ -1,6 +1,5 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
 import { useReducer } from "react";
 
 import BackLinkComponent from "@/components/v1/BackLink";
@@ -60,7 +59,6 @@ function reducer(state: SignUpStateType, action: SignUpAction) {
 
 export default function SignUp() {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const searchParams = useSearchParams();
   const { translate } = useI18n("pages.signup");
 
   async function handleSignUp() {

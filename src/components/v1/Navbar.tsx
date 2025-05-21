@@ -1,12 +1,10 @@
 "use client";
 
 import Image from "next/image";
-
 import { useEffect, useState } from "react";
 import { supabase } from "@/libs/supabase/client";
-
 import { useI18n } from "@/hooks/useI18n";
-
+import Spinner from "./Spinner";
 import LanguageSelector from "./LanguageSelector";
 
 export default function Navbar() {

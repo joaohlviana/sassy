@@ -18,23 +18,15 @@ export async function createClient() {
   return createServerClient(supabaseUrl, supabaseAnonKey,
     {
       cookies: {
-        get(name: string) {
-          const cookie = cookieStore.get(name)
+        async get(name: string) {
+          const cookie = await cookieStore.get(name)
           return cookie?.value
         },
         async set(name: string, value: string, options: any) {
-          try {
-            await cookieStore.set(name, value, options)
-          } catch {
-            // Handle server component cookie setting
-          }
+          await cookieStore.set(name, value, options)
         },
         async remove(name: string, options: any) {
-          try {
-            await cookieStore.delete(name)
-          } catch {
-            // Handle server component cookie removal
-          }
+          await cookieStore.delete(name)
         },
       },
     }

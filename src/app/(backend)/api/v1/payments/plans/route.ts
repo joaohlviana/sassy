@@ -16,8 +16,8 @@ if (!process.env.STRIPE_SECRET_KEY) {
 
 export async function GET(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const locale = cookieStore.get("locale")?.value || "en-US";
+    const cookieStore = cookies();
+    const locale = (await cookieStore.get("locale"))?.value || "en-US";
 
     const { translate } = await loadTranslationsSSR(locale);
     const { searchParams } = new URL(request.url);
@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error(error);
+    console.error('Error in /api/v1/payments/plans:', error);
     return NextResponse.json(
       { error: "Internal Server Error" }, 
       { 

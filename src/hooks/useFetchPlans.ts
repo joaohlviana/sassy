@@ -36,6 +36,7 @@ export const useFetchPlans = (
       try {
         const response = await fetch(
           `/api/v1/payments/plans?currency=${FIXED_CURRENCY}`, {
+          }
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',

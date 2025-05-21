@@ -17,7 +17,8 @@ if (!process.env.STRIPE_SECRET_KEY) {
 export async function GET(request: NextRequest) {
   try {
     const cookieStore = cookies();
-    const locale = (await cookieStore.get("locale"))?.value || "en-US";
+    const localeCookie = await cookieStore.get("locale");
+    const locale = localeCookie?.value || "en-US";
 
     const { translate } = await loadTranslationsSSR(locale);
     const { searchParams } = new URL(request.url);

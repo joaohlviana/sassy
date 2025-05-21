@@ -34,6 +34,7 @@ export const useFetchPlans = (
   useEffect(() => {
     const fetchPlans = async () => {
       try {
+        setIsLoading(true);
         const url = new URL(`/api/v1/payments/plans`, window.location.origin);
         url.searchParams.set('currency', FIXED_CURRENCY);
 
@@ -48,8 +49,9 @@ export const useFetchPlans = (
         );
 
         if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
+          console.error('Failed to fetch plans:', response.status);
+          setPlans([]);
+          return;
         }
 
         const data: Plan[] = await response.json();
@@ -59,8 +61,10 @@ export const useFetchPlans = (
         });
       } catch (error) {
         console.error("Error fetching plans:", error);
+        setPlans([]);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
     fetchPlans();
   }, [setIsLoading]);

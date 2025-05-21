@@ -1,4 +1,4 @@
-import { cookies } from "next/headers";
+import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from "next/server";
 
 import { stripe } from "@/libs/stripe";
@@ -12,7 +12,7 @@ import {
 export async function GET(request: NextRequest) {
   try {
     const cookieStore = cookies();
-    const localeCookie = await cookieStore.get("locale");
+    const localeCookie = cookieStore.get("locale");
     const locale = localeCookie?.value || "en-US";
 
     const { translate } = await loadTranslationsSSR(locale);

@@ -1,19 +1,6 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-
 import Stripe from "stripe";
-
-if (!process.env.STRIPE_SECRET_KEY) {
-  return NextResponse.json(
-    { error: "Stripe configuration missing" },
-    { 
-      status: 500,
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    }
-  );
-}
 
 import { stripe } from "@/libs/stripe";
 import PaymentService from "@/services/payment";
@@ -23,10 +10,14 @@ import {
   transformPurchasePlansDTO,
 } from "@/utils/transformPurchasePlansDTO";
 
+if (!process.env.STRIPE_SECRET_KEY) {
+  throw new Error("Stripe configuration missing");
+}
+
 export async function GET(request: NextRequest) {
   try {
     const cookieStore = cookies();
-    const locale = (await cookieStore).get("locale")?.value || "en-US";
+    const locale = cookieStore.get("locale")?.value || "en-US";
 
     const { translate } = await loadTranslationsSSR(locale);
     const { searchParams } = new URL(request.url);

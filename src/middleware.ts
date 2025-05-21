@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { createServerClient } from '@supabase/ssr';
 
 import { updateSession } from "@/libs/supabase/middleware";
-import { createClient } from "@/libs/supabase/server";
 import AuthService from "@/services/auth";
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 async function getUserPlan(
   userId: string
@@ -34,9 +37,25 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (pathname.startsWith("/dashboard")) {
-    const supabase = await createClient();
+    const supabase = createServerClient(
+      supabaseUrl,
+      supabaseAnonKey,
+      {
+        cookies: {
+          get(name) {
+            return request.cookies.get(name)?.value;
+          },
+          set(name, value, options) {
+            request.cookies.set(name, value, options);
+          },
+          remove(name, options) {
+            request.cookies.set(name, '', options);
+          },
+        },
+      }
+    );
+    
     const authService = new AuthService(supabase);
-
     const userId = await authService.getUserId();
 
     if (!userId) {

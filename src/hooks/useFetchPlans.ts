@@ -35,8 +35,18 @@ export const useFetchPlans = (
     const fetchPlans = async () => {
       try {
         const response = await fetch(
-          `/api/v1/payments/plans?currency=${FIXED_CURRENCY}`
+          `/api/v1/payments/plans?currency=${FIXED_CURRENCY}`,
+          {
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+            },
+          }
         );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
         const data: Plan[] = await response.json();
         setPlans((prev: Plan[]) => {

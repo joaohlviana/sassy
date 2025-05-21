@@ -21,13 +21,17 @@ export async function GET(request: NextRequest) {
     const currency = searchParams.get("currency");
 
     if (!currency) {
-      throw new Error("Missing Currency");
+      return NextResponse.json({ error: "Missing Currency" }, { status: 400 });
     }
 
     const paymentService = new PaymentService(stripe);
     const prices = await paymentService.listActivePrices();
 
-    const response = prices?.map((price) => {
+    if (!prices) {
+      return NextResponse.json({ error: "No prices found" }, { status: 404 });
+    }
+
+    const response = prices.map((price) => {
       const product = price.product as Stripe.Product;
       return {
         id: price.id,
@@ -39,15 +43,28 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    const tranform = await transformPurchasePlansDTO(
+    const transform = await transformPurchasePlansDTO(
       response as Array<InputData>,
       translate,
       currency as string
     );
 
-    return NextResponse.json(tranform, { status: 200 });
+    return NextResponse.json(transform, { 
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: error }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" }, 
+      { 
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      }
+    );
   }
 }

@@ -4,7 +4,13 @@ import { createClient } from 'npm:@supabase/supabase-js@2.49.1';
 
 const supabase = createClient(Deno.env.get('SUPABASE_URL') ?? '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '');
 const stripeSecret = Deno.env.get('STRIPE_SECRET_KEY')!;
-const stripe = new Stripe(stripeSecret, {
+
+// Ensure we're using the test key format
+const stripeKey = stripeSecret.startsWith('sk_test_') 
+  ? stripeSecret 
+  : `sk_test_${stripeSecret}`;
+
+const stripe = new Stripe(stripeKey, {
   appInfo: {
     name: 'Bolt Integration',
     version: '1.0.0',

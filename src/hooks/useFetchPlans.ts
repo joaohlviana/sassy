@@ -35,17 +35,17 @@ export const useFetchPlans = (
     const fetchPlans = async () => {
       try {
         const response = await fetch(
-          `/api/v1/payments/plans?currency=${FIXED_CURRENCY}`,
-          {
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json',
-            },
+          `/api/v1/payments/plans?currency=${FIXED_CURRENCY}`, {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache',
           }
         );
 
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          const errorText = await response.text();
+          throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
         }
 
         const data: Plan[] = await response.json();
@@ -54,7 +54,7 @@ export const useFetchPlans = (
           return prev.length >= 4 ? [...prev] : [...prev, ...data];
         });
       } catch (error) {
-        console.error("Erro ao buscar planos:", error);
+        console.error("Error fetching plans:", error);
       }
       setIsLoading(false);
     };

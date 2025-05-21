@@ -3,6 +3,18 @@ import { NextRequest, NextResponse } from "next/server";
 
 import Stripe from "stripe";
 
+if (!process.env.STRIPE_SECRET_KEY) {
+  return NextResponse.json(
+    { error: "Stripe configuration missing" },
+    { 
+      status: 500,
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    }
+  );
+}
+
 import { stripe } from "@/libs/stripe";
 import PaymentService from "@/services/payment";
 import { loadTranslationsSSR } from "@/utils/loadTranslationsSSR";
@@ -21,14 +33,30 @@ export async function GET(request: NextRequest) {
     const currency = searchParams.get("currency");
 
     if (!currency) {
-      return NextResponse.json({ error: "Missing Currency" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing Currency" },
+        { 
+          status: 400,
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        }
+      );
     }
 
     const paymentService = new PaymentService(stripe);
     const prices = await paymentService.listActivePrices();
 
     if (!prices) {
-      return NextResponse.json({ error: "No prices found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "No prices found" },
+        { 
+          status: 404,
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        }
+      );
     }
 
     const response = prices.map((price) => {

@@ -3,33 +3,38 @@
 import Image from "next/image";
 
 import { useEffect, useState } from "react";
+import { supabase } from "@/libs/supabase/client";
 
 import { useI18n } from "@/hooks/useI18n";
-import { supabase } from "@/libs/supabase/client";
-import AuthService from "@/services/auth";
 
 import LanguageSelector from "./LanguageSelector";
-import Spinner from "./Spinner";
 
 export default function Navbar() {
   const [isLoading, setIsLoading] = useState(true);
+  const [isClient, setIsClient] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLogged, setIsLogged] = useState(false);
   const { translate } = useI18n();
 
   useEffect(() => {
-    const getUserSession = async () => {
-      const AuthServiceInstance = new AuthService(supabase);
-      const user = await AuthServiceInstance.getUserId();
-      if (!!user) {
-        setIsLogged(true);
-      } else {
+    setIsClient(true);
+    const checkAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setIsLogged(!!session);
+      } catch (error) {
+        console.error('Auth check error:', error);
         setIsLogged(false);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
-    getUserSession();
+    checkAuth();
   }, []);
+
+  if (!isClient) {
+    return null;
+  }
 
   return (
     <header className="bg-white shadow">
@@ -58,7 +63,7 @@ export default function Navbar() {
         </nav>
 
         <div className="hidden md:flex items-center space-x-4 flex-shrink-0">
-          {isLoading ? (
+          {!isClient || isLoading ? (
             <div className="mr-12">
               <Spinner />
             </div>
@@ -123,7 +128,7 @@ export default function Navbar() {
             </a>
           </nav>
           <div className="flex flex-col space-y-4 p-4">
-            {isLoading ? (
+            {!isClient || isLoading ? (
               <Spinner />
             ) : !isLogged ? (
               <>

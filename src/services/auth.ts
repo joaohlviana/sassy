@@ -4,10 +4,23 @@ export default class AuthService {
     private baseUrl: string;
 
     constructor(private supabase: SupabaseClient) {
-        // Use the environment variable if available, otherwise fallback to the current origin
-        this.baseUrl = typeof window !== 'undefined' 
-            ? process.env.NEXT_PUBLIC_PROJECT_URL || window.location.origin
-            : process.env.NEXT_PUBLIC_PROJECT_URL || 'http://localhost:3000';
+        // Ensure we have a valid base URL in all environments
+        const defaultUrl = 'http://localhost:3000';
+        
+        if (typeof window !== 'undefined') {
+            // Browser environment
+            this.baseUrl = process.env.NEXT_PUBLIC_PROJECT_URL || window.location.origin;
+        } else {
+            // Server environment
+            this.baseUrl = process.env.NEXT_PUBLIC_PROJECT_URL || defaultUrl;
+        }
+
+        // Validate the URL to prevent Invalid URL errors
+        try {
+            new URL(this.baseUrl);
+        } catch {
+            this.baseUrl = defaultUrl;
+        }
     }
 
     async getUserId(): Promise<string | null> {
@@ -46,14 +59,20 @@ export default class AuthService {
     }
 
     async signInWithProvider(provider: Provider): Promise<void> {
-        const redirectUrl = new URL('/confirm-signup', this.baseUrl);
-        redirectUrl.searchParams.set('oauth', provider);
+        try {
+            const baseUrl = new URL(this.baseUrl);
+            const redirectUrl = new URL('/confirm-signup', baseUrl);
+            redirectUrl.searchParams.set('oauth', provider);
 
-        const { error } = await this.supabase.auth.signInWithOAuth({
-            provider,
-            options: { redirectTo: redirectUrl.toString() }
-        });
-        this.handleError(error);
+            const { error } = await this.supabase.auth.signInWithOAuth({
+                provider,
+                options: { redirectTo: redirectUrl.toString() }
+            });
+            this.handleError(error);
+        } catch (error) {
+            console.error('Error constructing redirect URL:', error);
+            throw new Error('Failed to initialize provider sign-in');
+        }
     }
 
     async signOut(): Promise<void> {
@@ -68,13 +87,19 @@ export default class AuthService {
     }
 
     async forgotPassword(email: string): Promise<boolean> {
-        const redirectUrl = new URL('/new-password', this.baseUrl);
-        
-        const { error } = await this.supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: redirectUrl.toString()
-        });
-        this.handleError(error);
-        return true;
+        try {
+            const baseUrl = new URL(this.baseUrl);
+            const redirectUrl = new URL('/new-password', baseUrl);
+            
+            const { error } = await this.supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: redirectUrl.toString()
+            });
+            this.handleError(error);
+            return true;
+        } catch (error) {
+            console.error('Error constructing redirect URL:', error);
+            throw new Error('Failed to initialize password reset');
+        }
     }
 
     async updatePassword(password: string): Promise<boolean> {

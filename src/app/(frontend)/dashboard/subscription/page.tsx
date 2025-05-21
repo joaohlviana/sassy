@@ -1,4 +1,4 @@
-import { cookies, headers } from "next/headers";
+import { headers } from "next/headers";
 
 import ManageBilling from "@/components/v1/ManageBilling";
 import PricingSection from "@/components/v1/Pricing";
@@ -13,8 +13,6 @@ export default async function SubscriptionPage() {
   const supabase = await createClient();
   const AuthServiceInstance = new AuthService(supabase);
   const session = await AuthServiceInstance.getSession();
-  const cookieStore = cookies();
-  const locale = cookieStore.get("locale")?.value || "en-US";
 
   const currentPlanText = translate("pages.subscription.plan.description");
   const currentPlan = capitalize(sharedData?.plan);
@@ -40,7 +38,7 @@ export default async function SubscriptionPage() {
           </div>
         </div>
       <div className="mt-12">
-        <PricingSection selectedOption={sharedData?.plan} locale={locale} />
+        <PricingSection selectedOption={sharedData?.plan} />
       </div>
       </div>
     </div>

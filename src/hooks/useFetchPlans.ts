@@ -8,8 +8,7 @@ import { useI18n } from "./useI18n";
 
 export const useFetchPlans = (
   hasFreeplan: boolean,
-  setIsLoading: (isLoading: boolean) => void,
-  locale?: string
+  setIsLoading: (isLoading: boolean) => void
 ) => {
   const { translate } = useI18n("components.pricing.plans");
   const SUBSCRIPTION_PLANS_BASE: Plan[] = [
@@ -37,9 +36,6 @@ export const useFetchPlans = (
       try {
         const url = new URL(`/api/v1/payments/plans`, window.location.origin);
         url.searchParams.set('currency', FIXED_CURRENCY);
-        if (locale) {
-          url.searchParams.set('locale', locale);
-        }
 
         const response = await fetch(
           url.toString(), {

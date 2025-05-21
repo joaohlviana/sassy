@@ -14,13 +14,12 @@ import Toggle from '../Toggle';
 export type PricingProps = {
     selectedOption: 'preview' | 'free' | 'starter' | 'creator' | 'pro';
     hasFreeplan?: boolean;
-    locale?: string;
 };
 
-export default function Pricing({ selectedOption, hasFreeplan = true, locale }: PricingProps) {
+export default function Pricing({ selectedOption, hasFreeplan = true }: PricingProps) {
     const { translate } = useI18n();
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    const { plans } = useFetchPlans(hasFreeplan, setIsLoading, locale);
+    const { plans } = useFetchPlans(hasFreeplan, setIsLoading);
     const [isAnnual, setIsAnnual] = useState<boolean>(false);
     const { handleCheckout } = useCheckout();
 

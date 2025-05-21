@@ -1,6 +1,5 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-import Stripe from "stripe";
 
 import { stripe } from "@/libs/stripe";
 import PaymentService from "@/services/payment";
@@ -9,10 +8,6 @@ import {
   InputData,
   transformPurchasePlansDTO,
 } from "@/utils/transformPurchasePlansDTO";
-
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error("Stripe configuration missing");
-}
 
 export async function GET(request: NextRequest) {
   try {
@@ -52,7 +47,11 @@ export async function GET(request: NextRequest) {
     }
 
     const response = prices.map((price) => {
-      const product = price.product as Stripe.Product;
+      const product = price.product;
+      if (!product || typeof product !== 'object') {
+        return null;
+      }
+
       return {
         id: price.id,
         productName: product.name,
@@ -61,7 +60,19 @@ export async function GET(request: NextRequest) {
         amount: ((price.unit_amount || 0) / 100).toFixed(0),
         currency: price.currency,
       };
-    });
+    }).filter(Boolean);
+
+    if (!response.length) {
+      return NextResponse.json(
+        { error: "No valid prices found" },
+        { 
+          status: 404,
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        }
+      );
+    }
 
     const transform = await transformPurchasePlansDTO(
       response as Array<InputData>,
@@ -77,7 +88,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error in /api/v1/payments/plans:', error);
-    return NextResponse.json(
+    return NextResponse.json( 
       { error: "Internal Server Error" }, 
       { 
         status: 500,

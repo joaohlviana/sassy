@@ -40,8 +40,17 @@ export default class PaymentService {
   }
 
   async listActivePrices(): Promise<Stripe.Price[]> {
-    const prices = await this.stripe.prices.list({ active: true, expand: ['data.product'] });
-    return prices.data;
+    try {
+      const prices = await this.stripe.prices.list({ 
+        active: true, 
+        expand: ['data.product'],
+        limit: 100
+      });
+      return prices.data.filter(price => price.product && typeof price.product === 'object');
+    } catch (error) {
+      console.error('Error fetching prices:', error);
+      throw new Error('Failed to fetch prices');
+    }
   }
 
   constructWebhookEvent(rawBody: string | Buffer, sig: string | string[], secret: string): Stripe.Event {
